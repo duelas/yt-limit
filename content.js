@@ -396,7 +396,7 @@ startURLTracking();
 
 let resumeCheckInterval = setInterval(() => {
   const savedTime = sessionStorage.getItem("yt_resume_time");
-console.log(savedTime);
+
   if (!savedTime) {
     clearInterval(resumeCheckInterval);
     return;
@@ -409,15 +409,13 @@ console.log(savedTime);
   );
 
   if (isAdShowing || hasAdComponents) {
-console.log("skip");
     return; 
   }
 
   const videoElement = getActiveVideoElement();
-console.log(videoElement);
   if (videoElement && videoElement.readyState >= 1) {
     clearInterval(resumeCheckInterval)
-console.log("resume");
+
     videoElement.currentTime = parseFloat(savedTime);
     
     videoElement.play().catch(e => console.log("Auto-play blocked by browser"));
