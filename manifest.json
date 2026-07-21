@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Video Limiter",
+  "version": "2.0",
+  "description": "Accurately limits YouTube videos and Shorts using dynamic injection.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://www.youtube.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
