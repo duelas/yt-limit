@@ -163,14 +163,42 @@ function showThresholdToast(initialRemaining, resetTime) {
     });
   }, 1000);
 }
+
+function getActiveVideoElement() {
+  const allVideos = document.querySelectorAll("video");
+  
+  if (allVideos.length === 1) return allVideos[0];
+  
+  for (let video of allVideos) {
+    if (
+      video && 
+      !video.paused &&
+      video.currentTime > 0 &&
+      video.offsetWidth > 0 &&
+      video.offsetHeight > 0
+    ) {
+      return video;
+    }
+  }
+
+  const activeShortContainer = document.querySelector('ytd-reel-video-renderer[is-active], ytd-reel-video-renderer:not([aria-hidden="true"])');
+  if (activeShortContainer) {
+    const shortVideo = activeShortContainer.querySelector("video");
+    if (shortVideo) return shortVideo;
+  }
+  
+  return document.querySelector("video");
+}
+
+
 function startPlaytimeTicker() {
-  stopPlaytimeTicker();
+   if (playtimeTicker) return;
 
   playtimeTicker = setInterval(() => {
-    const videoElement = document.querySelector("video");
+    const videoElement = getActiveVideoElement();
 
     if (videoElement && !videoElement.paused && videoElement.currentTime > 0) {
-
+console.log("tick");
       if (!chrome.runtime || !chrome.runtime.id) {
         clearInterval(playtimeTicker);
         return;
@@ -199,6 +227,7 @@ function startPlaytimeTicker() {
           }
         } else {
           chrome.runtime.sendMessage({ action: "addPlaytime", seconds: 1 });
+console.log("sub");
         }
       });
     }
@@ -353,7 +382,6 @@ function startURLTracking() {
 
     // SAFELY CHECK CONTEXT BEFORE SENDING MESSAGE
     if (!chrome.runtime || !chrome.runtime.id) {
-      clearInterval(stateCheckInterval);
       stopPlaytimeTicker();
       return;
     }
@@ -362,14 +390,14 @@ function startURLTracking() {
     if (id && id !== currentVideoId) {
       currentVideoId = id;
       stopPlaytimeTicker();
-            isCommentsPurchased = false;
+      isCommentsPurchased = false;
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
         if (response && response.remaining <= 0) {
           injectBlockElement(response.nextResetAt);
         } else {
-    	    hideCommentsSection();
+    	  hideCommentsSection();
           startPlaytimeTicker();
         }
       });
@@ -377,15 +405,12 @@ function startURLTracking() {
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
-        if (response && response.remaining <= 0) {
-          injectBlockElement(response.nextResetAt);
-          stopPlaytimeTicker();
-        } else {
+        if (response && response.remaining > 0) {
           const isCurrentlyBlocked = document.querySelector('[data-limit-reached="true"]');
           if (isCurrentlyBlocked) {
             removeBlockElement();
-	    startPlaytimeTicker();
           }
+	  startPlaytimeTicker();
 	}
       });
     } else {

@@ -1,9 +1,9 @@
 const CONFIG = {
-  BASE_ALLOWANCE: 10 * 60,	// in seconds
+  BASE_ALLOWANCE: 10,	// in seconds
   HOUR_IN_MS: 60 * 60 * 1000,	// in miliseconds
   MAX_TOPUP: 30 * 60,		// in seconds
-   COMMENT_COST: 5 * 60,		// in seconds
-    COMMENT_ALLOWANCE: 5 * 60	// in seconds
+  COMMENT_COST: 5 * 60,		// in seconds
+  COMMENT_ALLOWANCE: 5 * 60	// in seconds
 
 };
 
@@ -37,8 +37,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	maxAllowed: maxAllowed,
         remaining: Math.max(0, maxAllowed - consumed),
         nextResetAt: lastReset + CONFIG.HOUR_IN_MS,
-                baseAllowance: CONFIG.BASE_ALLOWANCE, 
-          hourInMs: CONFIG.HOUR_IN_MS
+        baseAllowance: CONFIG.BASE_ALLOWANCE, 
+        hourInMs: CONFIG.HOUR_IN_MS
       });
     });
     return true;
