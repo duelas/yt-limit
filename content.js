@@ -95,7 +95,6 @@ function showThresholdToast(initialRemaining, resetTime) {
     </div>
     <div style="font-size: 11px; color: #aaa;" id="toast-reset-label">🔄 Resets at ${formatResetTime(resetTime)}</div>
     
-    <!-- 🛒 新增：Toast 內建的解鎖留言按鈕 -->
     <button id="toast-unlock-btn" style="
       margin-top: 4px; background-color: #2c3e50; color: #ffffff; border: none;
       padding: 6px 10px; font-weight: bold; border-radius: 4px; cursor: pointer;
@@ -165,40 +164,14 @@ function showThresholdToast(initialRemaining, resetTime) {
 }
 
 function getActiveVideoElement() {
-  const allVideos = document.querySelectorAll("video");
-  
-  if (allVideos.length === 1) return allVideos[0];
-  
-  for (let video of allVideos) {
-    if (
-      video && 
-      !video.paused &&
-      video.currentTime > 0 &&
-      video.offsetWidth > 0 &&
-      video.offsetHeight > 0
-    ) {
-      return video;
-    }
-  }
-
-  const activeShortContainer = document.querySelector('ytd-reel-video-renderer[is-active], ytd-reel-video-renderer:not([aria-hidden="true"])');
-  if (activeShortContainer) {
-    const shortVideo = activeShortContainer.querySelector("video");
-    if (shortVideo) return shortVideo;
-  }
-  
   return document.querySelector("video");
 }
-
 
 function startPlaytimeTicker() {
    if (playtimeTicker) return;
 
-  playtimeTicker = setInterval(() => {
+  playtimeTicker = setInterval( () => {
     const videoElement = getActiveVideoElement();
-
-    if (videoElement && !videoElement.paused && videoElement.currentTime > 0) {
-
       if (!chrome.runtime || !chrome.runtime.id) {
         clearInterval(playtimeTicker);
         return;
@@ -229,12 +202,12 @@ function startPlaytimeTicker() {
           chrome.runtime.sendMessage({ action: "addPlaytime", seconds: 1 });
         }
       });
-    }
   }, 1000);
 }
 
 function stopPlaytimeTicker() {
   if (playtimeTicker) clearInterval(playtimeTicker);
+  playtimeTicker = null;
   if (toastTicker) clearInterval(toastTicker);
   const toast = document.getElementById('yt-limiter-toast');
   if (toast) toast.remove();
@@ -374,7 +347,7 @@ function removeBlockElement() {
 function startURLTracking() {
   if (stateCheckInterval) clearInterval(stateCheckInterval);
 
-  stateCheckInterval = setInterval(() => {
+  stateCheckInterval = setInterval( () => {
 
     const id = getYouTubeId(window.location.href);
 
@@ -389,7 +362,6 @@ function startURLTracking() {
     if (id && id !== currentVideoId) {
       currentVideoId = id;
       stopPlaytimeTicker();
-      isCommentsPurchased = false;
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
@@ -409,19 +381,18 @@ function startURLTracking() {
           if (isCurrentlyBlocked) {
             removeBlockElement();
           }
-	  startPlaytimeTicker();
 	}
       });
     } else {
       currentVideoId = "";
       stopPlaytimeTicker();
     }
-  }, 800);
+  }, 1000);
 }
 
 startURLTracking();
 
-let resumeCheckInterval = setInterval(() => {
+let resumeCheckInterval = setInterval(async () => {
   const savedTime = sessionStorage.getItem("yt_resume_time");
   
   if (!savedTime) {
@@ -429,7 +400,7 @@ let resumeCheckInterval = setInterval(() => {
     return;
   }
 
-  const videoElement = document.querySelector("video");
+  const videoElement = await getActiveVideoElement();
   if (videoElement && videoElement.readyState >= 1) {
     clearInterval(resumeCheckInterval);
     
