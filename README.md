@@ -3,6 +3,7 @@ Default: 10 minutes per 1 hour
 
 All actions done are specific for each tabs each video each loads  
 No tabs or video interfering, if the url stays effect stays  
+Quota are shared globally though  
 
 Every loaded video has 10 seconds of delayed window  
 after 10 seconds the time start counting with -10 seconds first
