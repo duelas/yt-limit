@@ -9,6 +9,8 @@ let isThresholdMet = false;
 let isCommentsPurchased = false;
 let commentsUnlockTimer = null;
 
+let resumeCheckInterval = null;
+
 function getYouTubeId(url) {
   try {
     const urlObj = new URL(url);
@@ -164,6 +166,28 @@ function showThresholdToast(initialRemaining, resetTime) {
 }
 
 function getActiveVideoElement() {
+  const allVideos = document.querySelectorAll("video");
+  
+  if (allVideos.length === 1) return allVideos[0];
+  
+  for (let video of allVideos) {
+    if (
+      video && 
+      !video.paused &&
+      video.currentTime > 0 &&
+      video.offsetWidth > 0 &&
+      video.offsetHeight > 0
+    ) {
+      return video;
+    }
+  }
+  
+  const activeShortContainer = document.querySelector('ytd-reel-video-renderer[is-active], ytd-reel-video-renderer:not([aria-hidden="true"])');
+  if (activeShortContainer) {
+    const shortVideo = activeShortContainer.querySelector("video");
+    if (shortVideo) return shortVideo;
+  }
+  
   return document.querySelector("video");
 }
 
@@ -360,6 +384,8 @@ function startURLTracking() {
     if (id && id !== currentVideoId) {
       currentVideoId = id;
       stopPlaytimeTicker();
+      if (resumeCheckInterval) clearInterval(resumeCheckInterval);
+      resumeCheckInterval = null;
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
@@ -390,7 +416,7 @@ function startURLTracking() {
 
 startURLTracking();
 
-let resumeCheckInterval = setInterval(() => {
+resumeCheckInterval = setInterval(() => {
   const savedTime = sessionStorage.getItem("yt_resume_time");
   
   if (!savedTime) {
@@ -398,13 +424,20 @@ let resumeCheckInterval = setInterval(() => {
     return;
   }
 
-  const videoElement = getActiveVideoElement();
+  const isAdShowing = document.querySelector(".ad-showing, .ad-interrupting, .ytp-ad-player-overlay");
+  
+  if (isAdShowing) {
+    return;
+  }
+
+  const videoElement = typeof getActiveVideoElement === "function" ? getActiveVideoElement() : document.querySelector("video");
+  
   if (videoElement && videoElement.readyState >= 1) {
-    clearInterval(resumeCheckInterval);
-    
+    clearInterval(resumeCheckInterval)
+
     videoElement.currentTime = parseFloat(savedTime);
     
-    videoElement.play().catch(e => console.log("Auto-play blocked by browser, click to play."));
+    videoElement.play().catch(e => console.log("Auto-play blocked by browser"));
     
     sessionStorage.removeItem("yt_resume_time");
   }
