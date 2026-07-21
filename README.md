@@ -6,7 +6,7 @@ No tabs or video interfering, if the url stays effect stays
 Quota are shared globally though  
 
 Every loaded video has 10 seconds of delayed window  
-after 10 seconds the time start counting with -10 seconds first
+after 10 seconds the time start counting with -10 seconds head first
 
 Add quota by postponing the resetting timepoint  
 Quota reset back to CONFIG.BASE_ALLOWANCE no matter what you have before  
