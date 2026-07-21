@@ -28,7 +28,7 @@ function formatResetTime(timestamp) {
 
 function injectBlockElement(resetTime) {
 
-  const videoElement = document.querySelector("video");
+  const videoElement = getActiveVideoElement();
   if (videoElement && videoElement.currentTime > 0) {
     sessionStorage.setItem("yt_resume_time", videoElement.currentTime);
   }
@@ -396,6 +396,7 @@ startURLTracking();
 
 let resumeCheckInterval = setInterval(() => {
   const savedTime = sessionStorage.getItem("yt_resume_time");
+console.log(savedTime);
   if (!savedTime) {
     clearInterval(resumeCheckInterval);
     return;
@@ -408,13 +409,15 @@ let resumeCheckInterval = setInterval(() => {
   );
 
   if (isAdShowing || hasAdComponents) {
+console.log("skip");
     return; 
   }
 
   const videoElement = getActiveVideoElement();
+console.log(videoElement);
   if (videoElement && videoElement.readyState >= 1) {
     clearInterval(resumeCheckInterval)
-
+console.log("resume");
     videoElement.currentTime = parseFloat(savedTime);
     
     videoElement.play().catch(e => console.log("Auto-play blocked by browser"));
