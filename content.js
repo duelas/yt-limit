@@ -192,6 +192,17 @@ function startPlaytimeTicker() {
    if (playtimeTicker) return;
 
   playtimeTicker = setInterval( () => {
+
+    const isAdShowing = document.querySelector(".ad-showing, .ad-interrupting, .ytp-ad-player-overlay");
+
+    const hasAdComponents = document.querySelector(
+      ".ytp-ad-text, .ytp-ad-skip-button-slot, .ytp-ad-preview-text"
+    );
+
+    if (isAdShowing || hasAdComponents) {
+      return; 
+    }
+
     const videoElement = getActiveVideoElement();
     if (!videoElement) return;
     if (videoElement && videoElement.paused) return;
