@@ -1,4 +1,6 @@
 function updatePopupUI(success) {
+  if (!chrome.runtime || !chrome.runtime.id) return;
+
   chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
     if (!response) return;
 
@@ -6,6 +8,7 @@ function updatePopupUI(success) {
     const remainingSeconds = response.remaining;
     const countMins = Math.floor(remainingSeconds / 60);
     const countSecs = remainingSeconds % 60;
+
     const countEl = document.getElementById('count');
     countEl.textContent = `${countMins}:${countSecs.toString().padStart(2, '0')}`;
 
@@ -29,6 +32,17 @@ function updatePopupUI(success) {
     // 3. Render Postponed Reset Deadline Timestamp String
     const resetTimeFormatted = new Date(response.nextResetAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     document.getElementById('reset-label').innerHTML = `🔄 Resets at <strong>${resetTimeFormatted}</strong>`;
+
+    const configMinutes = response.baseAllowance >= 60 ? Math.floor(response.baseAllowance / 60) : response.baseAllowance;
+    const configUnitLabel = response.baseAllowance >= 60 ? "Mins" : "Secs";
+    
+    const configHours = response.hourInMs / (60 * 60 * 1000);
+    
+    const btnEl = document.getElementById('add-time-btn');
+    if (btnEl) {
+      btnEl.textContent = `+${configMinutes} ${configUnitLabel} (+${configHours}hr Reset Delay)`;
+    }
+
 
     // 4. Update the structural Status Text Layout Indicators
     const statusEl = document.getElementById('status');

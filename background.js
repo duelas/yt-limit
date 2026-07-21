@@ -36,7 +36,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         consumed: consumed,
 	maxAllowed: maxAllowed,
         remaining: Math.max(0, maxAllowed - consumed),
-        nextResetAt: lastReset + CONFIG.HOUR_IN_MS
+        nextResetAt: lastReset + CONFIG.HOUR_IN_MS,
+                baseAllowance: CONFIG.BASE_ALLOWANCE, 
+          hourInMs: CONFIG.HOUR_IN_MS
       });
     });
     return true;
