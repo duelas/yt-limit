@@ -15,3 +15,5 @@ Default hides comment section (shorts also supported)
 Spend quota to unhide for a period  
 Only unhides for the current video  
 
+
+Produced along with Google Gemini
