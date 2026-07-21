@@ -8,6 +8,7 @@ Every loaded video has 10 seconds of delayed window
 after 10 seconds the time start counting with -10 seconds first
 
 Add quota by postponing the resetting timepoint  
+Quota reset back to CONFIG.BASE_ALLOWANCE no matter what you have before  
 Topup only through extension popup.html showed by clicking extension icon  
 See background.js beginning CONFIG struct for settings  
 
