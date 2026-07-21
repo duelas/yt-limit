@@ -390,7 +390,7 @@ function startURLTracking() {
 
 startURLTracking();
 
-let resumeCheckInterval = setInterval(async () => {
+let resumeCheckInterval = setInterval(() => {
   const savedTime = sessionStorage.getItem("yt_resume_time");
   
   if (!savedTime) {
