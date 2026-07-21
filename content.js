@@ -74,7 +74,7 @@ function showThresholdToast(initialRemaining, resetTime) {
     toast = document.createElement('div');
     toast.id = 'yt-limiter-toast';
     toast.style.cssText = `
-      position: fixed; top: 20px; right: 20px; background-color: #0f0f0f; color: #ffffff;
+      position: fixed; top: 80px; right: 20px; background-color: #0f0f0f; color: #ffffff;
       border-left: 5px solid #ff0000; padding: 12px 18px; border-radius: 4px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.6); font-family: Arial, sans-serif;
       font-size: 13px; z-index: 99999; display: flex; flex-direction: column; gap: 6px;
@@ -100,7 +100,7 @@ function showThresholdToast(initialRemaining, resetTime) {
       margin-top: 4px; background-color: #2c3e50; color: #ffffff; border: none;
       padding: 6px 10px; font-weight: bold; border-radius: 4px; cursor: pointer;
       font-size: 11px; transition: background-color 0.2s;
-    ">🔓 Unlock Comments (-5m)</button>
+    ">🔓 Unlock Comments</button>
   `;
 
   const unlockBtn = document.getElementById('toast-unlock-btn');
@@ -114,14 +114,14 @@ function showThresholdToast(initialRemaining, resetTime) {
         if (response && response.success) {
           showCommentsSection(response.commentAllowed * 1000); 
           
-          unlockBtn.textContent = "✅ Comments Unlocked (5m)";
+          unlockBtn.textContent = "✅ Comments Unlocked";
           unlockBtn.style.backgroundColor = "#2ecc71";
           unlockBtn.disabled = true;
         } else if (response && !response.success) {
           unlockBtn.textContent = "❌ Not Enough Time!";
           unlockBtn.style.backgroundColor = "#e74c3c";
           setTimeout(() => {
-            unlockBtn.textContent = "🔓 Unlock Comments (-5m)";
+            unlockBtn.textContent = "🔓 Unlock Comments";
             unlockBtn.style.backgroundColor = "#2c3e50";
           }, 2000);
         }
@@ -129,12 +129,19 @@ function showThresholdToast(initialRemaining, resetTime) {
     });
   }
 
+
   if (toastTicker) clearInterval(toastTicker);
   toastTicker = setInterval(() => {
     if (!chrome.runtime || !chrome.runtime.id) {
       clearInterval(toastTicker);
       return;
     }
+        if (!isCommentsPurchased) {
+          const unlockBtn = document.getElementById('toast-unlock-btn');
+      unlockBtn.textContent = "🔓 Unlock Comments";
+      unlockBtn.style.backgroundColor = "#2c3e50";
+      unlockBtn.disabled = false;
+        }
     chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
       if (chrome.runtime.lastError) {
         clearInterval(toastTicker);
@@ -355,6 +362,7 @@ function startURLTracking() {
     if (id && id !== currentVideoId) {
       currentVideoId = id;
       stopPlaytimeTicker();
+            isCommentsPurchased = false;
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
@@ -362,7 +370,6 @@ function startURLTracking() {
           injectBlockElement(response.nextResetAt);
         } else {
     	    hideCommentsSection();
-	    setTimeout(hideCommentsSection,1000);
           startPlaytimeTicker();
         }
       });
