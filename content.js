@@ -380,6 +380,7 @@ function startURLTracking() {
 
     // SAFELY CHECK CONTEXT BEFORE SENDING MESSAGE
     if (!chrome.runtime || !chrome.runtime.id) {
+      clearInterval(stateCheckInterval);
       stopPlaytimeTicker();
       return;
     }
