@@ -172,17 +172,15 @@ function startPlaytimeTicker() {
 
   playtimeTicker = setInterval( () => {
     const videoElement = getActiveVideoElement();
+    if (!videoElement) return;
+    if (videoElement && videoElement.paused) return;
       if (!chrome.runtime || !chrome.runtime.id) {
         clearInterval(playtimeTicker);
         return;
       }
 
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
-        // Handle context invalidation error gracefully
-        if (chrome.runtime.lastError) {
-          clearInterval(playtimeTicker);
-          return;
-        }
+
         if (!response) return;
 
         if (response.remaining <= 0) {
@@ -400,7 +398,7 @@ let resumeCheckInterval = setInterval(async () => {
     return;
   }
 
-  const videoElement = await getActiveVideoElement();
+  const videoElement = getActiveVideoElement();
   if (videoElement && videoElement.readyState >= 1) {
     clearInterval(resumeCheckInterval);
     
