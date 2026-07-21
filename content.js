@@ -198,7 +198,7 @@ function startPlaytimeTicker() {
     const videoElement = getActiveVideoElement();
 
     if (videoElement && !videoElement.paused && videoElement.currentTime > 0) {
-console.log("tick");
+
       if (!chrome.runtime || !chrome.runtime.id) {
         clearInterval(playtimeTicker);
         return;
@@ -227,7 +227,6 @@ console.log("tick");
           }
         } else {
           chrome.runtime.sendMessage({ action: "addPlaytime", seconds: 1 });
-console.log("sub");
         }
       });
     }
@@ -331,7 +330,6 @@ function hideCommentsSection() {
     } else {
       openShortsPanels.forEach(panel => {
         const closeButton = panel.querySelector("#visibility-button button, ytd-button-renderer#visibility-button");
-console.log("closeButtonFound");
         if (closeButton) {
           closeButton.click();
           panelClosedSuccess = true;
