@@ -1,3 +1,56 @@
+const CHEAT_CODE = ['z', 'e', 'r', 'o'];
+let inputHistory = ['1','2','3','4'];
+
+let streamStatus = "";
+let prevStreamStatus = "";
+
+document.addEventListener('keydown', (event) => {
+
+  inputHistory.push(event.key.toLowerCase());
+  
+  if (inputHistory.length > CHEAT_CODE.length) {
+    inputHistory.shift();
+  }
+  
+  const isMatch = inputHistory.every((key, index) => key === CHEAT_CODE[index]);
+  
+  if (isMatch) {
+    inputHistory = ['1','2','3','4'];
+    triggerSecretReset();
+  }
+});
+
+function triggerSecretReset() {
+  if (!chrome.runtime || !chrome.runtime.id) return;
+
+  chrome.runtime.sendMessage({ action: "resetQuotaToZero" }, (response) => {
+    if (chrome.runtime.lastError) return;
+    
+    if (response && response.success) {
+      updatePopupUI(2);
+      
+      const statusEl = document.getElementById('status');
+      if (statusEl) {
+        const originalText = statusEl.textContent;
+        const originalClass = statusEl.className;
+        
+        statusEl.textContent = "⚡ 3 seconded debug! ⚡";
+        statusEl.style.color = "#00ffff";
+
+        // let popup status can be refreshed by changing to not state 0 nor 1
+
+	setTimeout(
+        ()=>{
+              prevStreamStatus = 2;
+              updatePopupUI(0);
+            },
+        1000);
+      }
+    }
+  });
+}
+
+
 function updatePopupUI(success) {
   if (!chrome.runtime || !chrome.runtime.id) return;
 
@@ -46,13 +99,29 @@ function updatePopupUI(success) {
 
     // 4. Update the structural Status Text Layout Indicators
     const statusEl = document.getElementById('status');
+
     if (remainingSeconds <= 0) {
-      statusEl.textContent = "Status: Time Expired! 🛑";
-      statusEl.className = "status-blocked";
+      streamStatus = 0;
     } else {
-      statusEl.textContent = "Status: Streaming Allowed ✅";
-      statusEl.className = "status-ok";
+      streamStatus = 1;
     }
+
+    if (prevStreamStatus == streamStatus) return;
+
+    switch (streamStatus) {
+      case 0:
+        statusEl.textContent = "Status: Time Expired! 🛑";
+        statusEl.className = "status-blocked";
+        break;
+      case 1:
+        statusEl.textContent = "Status: Streaming Allowed ✅";
+        statusEl.className = "status-ok";
+        break;
+      default:
+        break;
+    }
+
+    prevStreamStatus = streamStatus;
   });
 }
 

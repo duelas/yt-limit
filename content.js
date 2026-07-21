@@ -9,8 +9,6 @@ let isThresholdMet = false;
 let isCommentsPurchased = false;
 let commentsUnlockTimer = null;
 
-let resumeCheckInterval = null;
-
 function getYouTubeId(url) {
   try {
     const urlObj = new URL(url);
@@ -165,6 +163,7 @@ function showThresholdToast(initialRemaining, resetTime) {
   }, 1000);
 }
 
+
 function getActiveVideoElement() {
   const allVideos = document.querySelectorAll("video");
   
@@ -173,8 +172,6 @@ function getActiveVideoElement() {
   for (let video of allVideos) {
     if (
       video && 
-      !video.paused &&
-      video.currentTime > 0 &&
       video.offsetWidth > 0 &&
       video.offsetHeight > 0
     ) {
@@ -347,24 +344,6 @@ function hideCommentsSection() {
   attemptHide();
 }
 
-function removeBlockElement() {
-  const targets = ["ytd-player", "#player-theater-container", "ytd-shorts", "#shorts-container"];
-  let removed = false;
-
-  targets.forEach(selector => {
-    const element = document.querySelector(selector);
-    if (element && element.hasAttribute('data-limit-reached')) {
-      element.removeAttribute('data-limit-reached');
-      removed = true;
-    }
-  });
-
-  // If a block was active, we reload the page or force YouTube to re-render the player state
-  if (removed) {
-    location.reload(); // Cleanest way to force YouTube SPA to rebuild the player pipeline
-  }
-
-}
 
 function startURLTracking() {
   if (stateCheckInterval) clearInterval(stateCheckInterval);
@@ -384,8 +363,6 @@ function startURLTracking() {
     if (id && id !== currentVideoId) {
       currentVideoId = id;
       stopPlaytimeTicker();
-      if (resumeCheckInterval) clearInterval(resumeCheckInterval);
-      resumeCheckInterval = null;
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
@@ -397,13 +374,13 @@ function startURLTracking() {
         }
       });
     } else if (id) {
-      chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
+      chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, async (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
         if (response && response.remaining > 0) {
-          const isCurrentlyBlocked = document.querySelector('[data-limit-reached="true"]');
+          const isCurrentlyBlocked = await document.querySelector('[data-limit-reached="true"]');
           if (isCurrentlyBlocked) {
-            removeBlockElement();
+             await location.reload();
           }
 	}
       });
@@ -416,22 +393,25 @@ function startURLTracking() {
 
 startURLTracking();
 
-resumeCheckInterval = setInterval(() => {
+
+let resumeCheckInterval = setInterval(() => {
   const savedTime = sessionStorage.getItem("yt_resume_time");
-  
   if (!savedTime) {
     clearInterval(resumeCheckInterval);
     return;
   }
 
   const isAdShowing = document.querySelector(".ad-showing, .ad-interrupting, .ytp-ad-player-overlay");
-  
-  if (isAdShowing) {
-    return;
+
+  const hasAdComponents = document.querySelector(
+    ".ytp-ad-text, .ytp-ad-skip-button-slot, .ytp-ad-preview-text"
+  );
+
+  if (isAdShowing || hasAdComponents) {
+    return; 
   }
 
-  const videoElement = typeof getActiveVideoElement === "function" ? getActiveVideoElement() : document.querySelector("video");
-  
+  const videoElement = getActiveVideoElement();
   if (videoElement && videoElement.readyState >= 1) {
     clearInterval(resumeCheckInterval)
 
@@ -442,3 +422,4 @@ resumeCheckInterval = setInterval(() => {
     sessionStorage.removeItem("yt_resume_time");
   }
 }, 300);
+

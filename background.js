@@ -93,5 +93,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true; 
   }
 
+  if (request.action === "resetQuotaToZero") {
+    chrome.storage.local.get(['maxAllowedSeconds'], (data) => {
+      let maxAllowed = data.maxAllowedSeconds || CONFIG.BASE_ALLOWANCE;
+      
+      let lockdownConsumedSeconds = maxAllowed - 3;
+
+      chrome.storage.local.set({ 
+        consumedSeconds: lockdownConsumedSeconds
+      }, () => {
+        sendResponse({ success: true });
+      });
+    });
+    return true; 
+  }
+
 
 });
