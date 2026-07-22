@@ -374,6 +374,7 @@ function startURLTracking() {
     if (id && id !== currentVideoId) {
       currentVideoId = id;
       stopPlaytimeTicker();
+      sessionStorage.removeItem("yt_resume_time");
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
