@@ -60,7 +60,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             let  isSuccess = 1;
 
             // if trying to add time surpassing max topup limit
-            if ( maxAllowed > CONFIG.MAX_TOPUP ) {
+            if ( maxAllowed >= CONFIG.MAX_TOPUP ) {
 	isSuccess = 2;
             } else {
       maxAllowed += CONFIG.BASE_ALLOWANCE;
