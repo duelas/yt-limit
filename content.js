@@ -373,6 +373,7 @@ function startURLTracking() {
 
     
     if (id && id !== currentVideoId) {
+console.log("first");
       currentVideoId = id;
       stopPlaytimeTicker();
       if (id !== sessionStorage.getItem("yt_resume_video_id")) {
@@ -382,12 +383,8 @@ function startURLTracking() {
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
-        if (response && response.remaining <= 0) {
-          injectBlockElement(response.nextResetAt);
-        } else {
     	  hideCommentsSection();
           startPlaytimeTicker();
-        }
       });
     } else if (id) {
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
@@ -398,7 +395,9 @@ function startURLTracking() {
           if (isCurrentlyBlocked) {
              location.reload();
           }
-	}
+	} else if (response.remaining <= 0){
+          injectBlockElement(response.nextResetAt);
+        }
       });
     } else {
       currentVideoId = "";
