@@ -373,18 +373,17 @@ function startURLTracking() {
 
     
     if (id && id !== currentVideoId) {
-console.log("first");
       currentVideoId = id;
       stopPlaytimeTicker();
       if (id !== sessionStorage.getItem("yt_resume_video_id")) {
           sessionStorage.removeItem("yt_resume_time");
           sessionStorage.removeItem("yt_resume_video_id");
-        }
+      }
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
-    	  hideCommentsSection();
-          startPlaytimeTicker();
+    	hideCommentsSection();
+        startPlaytimeTicker();
       });
     } else if (id) {
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
@@ -395,7 +394,7 @@ console.log("first");
           if (isCurrentlyBlocked) {
              location.reload();
           }
-	} else if (response.remaining <= 0){
+	} else if (response.remaining <= 0) {
           injectBlockElement(response.nextResetAt);
         }
       });
