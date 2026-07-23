@@ -389,7 +389,7 @@ function startURLTracking() {
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
-        if (response && response.remaining > 0) {
+        if (response.remaining > 0) {
           const isCurrentlyBlocked = document.querySelector('[data-limit-reached="true"]');
           if (isCurrentlyBlocked) {
              location.reload();
