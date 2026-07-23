@@ -31,6 +31,7 @@ function injectBlockElement(resetTime) {
   const videoElement = getActiveVideoElement();
   if (videoElement && videoElement.currentTime > 0) {
     sessionStorage.setItem("yt_resume_time", videoElement.currentTime);
+    sessionStorage.setItem("yt_resume_video_id", currentVideoId);
   }
 
   const targets = ["ytd-player", "#player-theater-container", "ytd-shorts", "#shorts-container"];
@@ -374,7 +375,10 @@ function startURLTracking() {
     if (id && id !== currentVideoId) {
       currentVideoId = id;
       stopPlaytimeTicker();
-      sessionStorage.removeItem("yt_resume_time");
+      if (id !== sessionStorage.getItem("yt_resume_video_id")) {
+          sessionStorage.removeItem("yt_resume_time");
+          sessionStorage.removeItem("yt_resume_video_id");
+        }
       chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
@@ -386,13 +390,13 @@ function startURLTracking() {
         }
       });
     } else if (id) {
-      chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, async (response) => {
+      chrome.runtime.sendMessage({ action: "checkTimeAllowance" }, (response) => {
         if (chrome.runtime.lastError) return;
 	if (!response) return;
         if (response && response.remaining > 0) {
-          const isCurrentlyBlocked = await document.querySelector('[data-limit-reached="true"]');
+          const isCurrentlyBlocked = document.querySelector('[data-limit-reached="true"]');
           if (isCurrentlyBlocked) {
-             await location.reload();
+             location.reload();
           }
 	}
       });
