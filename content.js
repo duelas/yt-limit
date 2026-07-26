@@ -393,6 +393,10 @@ function startURLTracking() {
           const isCurrentlyBlocked = document.querySelector('[data-limit-reached="true"]');
           if (isCurrentlyBlocked) {
              location.reload();
+             return;
+          }
+          if (playtimeTicker == null) {
+             startPlaytimeTicker();
           }
 	}
       });
