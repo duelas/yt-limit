@@ -394,9 +394,7 @@ function startURLTracking() {
           if (isCurrentlyBlocked) {
              location.reload();
           }
-	} else if (response.remaining <= 0) {
-          injectBlockElement(response.nextResetAt);
-        }
+	}
       });
     } else {
       currentVideoId = "";
@@ -407,12 +405,17 @@ function startURLTracking() {
 
 startURLTracking();
 
+let resumeInterval;
 
-let resumeCheckInterval = setTimeout(setInterval(() => {
+setTimeout(tryResume,500);
+
+function tryResume(){
+
+ resumeInterval = setInterval(() => {
   const savedTime = sessionStorage.getItem("yt_resume_time");
 
   if (!savedTime) {
-    clearInterval(resumeCheckInterval);
+    clearInterval(resumeInterval);
     return;
   }
 
@@ -428,14 +431,16 @@ let resumeCheckInterval = setTimeout(setInterval(() => {
 
   const videoElement = getActiveVideoElement();
   if (videoElement && videoElement.readyState >= 1) {
-    clearInterval(resumeCheckInterval)
-
     videoElement.currentTime = parseFloat(savedTime);
     
     videoElement.play().catch(e => console.log("Auto-play blocked by browser"));
     
     sessionStorage.removeItem("yt_resume_time");
     sessionStorage.removeItem("yt_resume_video_id");
+
+    clearInterval(resumeInterval);
   }
-}, 300),500);
+}, 300);
+
+}
 
