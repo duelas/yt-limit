@@ -408,7 +408,7 @@ function startURLTracking() {
 startURLTracking();
 
 
-let resumeCheckInterval = setInterval(() => {
+let resumeCheckInterval = setTimeout(setInterval(() => {
   const savedTime = sessionStorage.getItem("yt_resume_time");
 
   if (!savedTime) {
@@ -435,6 +435,7 @@ let resumeCheckInterval = setInterval(() => {
     videoElement.play().catch(e => console.log("Auto-play blocked by browser"));
     
     sessionStorage.removeItem("yt_resume_time");
+    sessionStorage.removeItem("yt_resume_video_id");
   }
-}, 300);
+}, 300),500);
 
