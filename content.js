@@ -289,7 +289,7 @@ function hideCommentsSection() {
   if (typeof isCommentsPurchased !== 'undefined' && isCommentsPurchased) return;
 
   let retryCount = 0;
-  const maxRetries = 10;
+  const maxRetries = 20;
 
   let buttonHiddenSuccess = false;
   let panelClosedSuccess = false;
@@ -349,7 +349,7 @@ function hideCommentsSection() {
 
     if (!shortsDefensesReady && retryCount < maxRetries) {
       retryCount++;
-      setTimeout(attemptHide, 200);
+      setTimeout(attemptHide, 500);
     }
   };
 
